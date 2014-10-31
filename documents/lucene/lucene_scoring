@@ -1,0 +1,13 @@
+score(q,d) = coord(q,d) · queryNorm(q) · ∑( tf(t in d) · idf(t)^2 · t.getBoost() · norm(t,d) )
+
+1 norm(term, document):								//文档的标准化因子
+	norm(term, document) = documentBoost * fieldsBoost * lengthNorm;
+	documentBoost = doc.getBoost()						//文档提权因子
+	fieldsBoost   = for(field in document){multiply(field.getBoost())};	//包含term的域提权因子乘积
+	lengthNorm    = 1/sqrt(documentTermNum);				//文档的长度因子			
+
+* concepts:
+	(1) 提权：
+		term.getBoost();		//针对query中的term提权
+		field.getBoost();		//针对field提权
+		document.getBoost();		//针对document提权

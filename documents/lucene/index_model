@@ -1,0 +1,41 @@
+1 对索引的增删改:
+	通过 IndexWriter 类的方法:
+		addDcoument(...);
+		deleteDocument(...);
+		updateDocument(...);
+
+2 域选项:
+	1 索引选项:
+		Index.ANALYZED			//分析并索引
+		Index.NOT_ANALYZED		//不分析但索引
+		Index.ANALYZED_NO_NORM		//分析并索引，不记录标准化因子
+		Index.NOT_ANALYZED_NO_NORM	//不分析但索引，不记录标准化因子
+		Index.NO			//该域不索引
+	2 存储选项:
+		Store.YES			//存储原始数据
+		Store.NO			//不存储原始数据
+
+	3 域的term vector:
+		存储term信息向量(term content, position, offset, ...)
+		TermVector.WITH_POSITIONS_OFFSETS	//存储项向量
+		TermVector.NO				//不存储项向量
+
+	4 域排序：
+		用于排序的域必须进行索引，且该域只能存在一个语汇单元(可以通过
+		只生成一个语汇单元的分析器 KeyWordAnalyzer 或只索引 不分析文档)。
+
+	5 域 和 文档加权操作：
+		加权操作是为了定义不同分类的文档或域的评分基准，通过seetBoost()方法实现。
+
+3 lucene对数字的索引:
+	document.addDcoument(new NumericField("price").setDoubleValue(1999));
+	luncne支持通过定义NumericField域实现对数字的索引，从而实现春数字的排序。
+	通过 数字 索引，可以实现对日期的变相索引。
+
+4 域截取:
+	域截取 是为了 限制索引的语汇单元数量，使分析出的语汇单元只索引指定的前N个。
+	通过 MaxFieldLength 实现截取控制，其默认两个实例:
+	MaxFieldLength.LIMITED,
+	MaxFieldLength.UNLIMITED;
+
+
