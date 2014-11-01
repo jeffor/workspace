@@ -1,0 +1,63 @@
+
+1 修改最后一次提交(git commit --amend)
+	git commit -m "initial commit"
+	git add forgotten_file
+	git commit --amend
+
+2 撤出暂存文件(git reset <filename>)
+
+3 取消修改[检出旧版文件](git checkout -- <filename>)
+
+4 查看提交历史(git log)
+	git log --pretty=format:"%h %s %ae" --graph
+
+5 删除文件
+	git rm <filename>			删除普通的跟踪文件
+	git rm -f <filename>		强制删除暂存文件
+	git rm --cached <filename>	取消跟踪但不删除文件
+
+6 比较文件差异
+	git diff			比较未暂存文件和快照文件的差异
+	git diff --cached		比较已暂存文件和快照文件的差异
+
+
+##################################
+	远程文件操作
+##################################
+
+7 显示远程仓库(git remote)
+	git remote			显示远程仓库名称
+	git remote -v			显示远程仓库详细信息
+
+8 添加远程仓库(git remote add <remote-name> <url>)
+
+9 查看远程仓库信息(git remote show <remote-name>)
+
+10 重命名远程仓库(git remote rename <old-remote-name> <new-remote-name>)
+
+11 删除远程仓库(git remote rm <remote-name>)
+
+12 提取远程仓库的所有数据(git fetch)
+	git fetch <remote-name>			提取远程仓库信息但不自动合并
+	git pull <remote-name>	<branch>	提取远程仓库信息并自动合并
+
+13 推送分支到远程仓库(git push)
+	git push <remote-name> <branch>		将本地分支推送到远程仓库
+
+##################################
+	git标签
+##################################
+
+14 列出所有标签(git tag)
+
+15 查看指定标签(git show <tag-name>)
+
+16 添加轻量级标签(git tag <tag-name>)
+
+16 添加重量级标签(git tag -a/-s <tag-name> -m <'message'>)
+
+17 验证标签(git tag -v <tag-name>)
+
+18 推送标签
+	git push <branch> <tag-name>		推送指定标签
+	git push <branch> --tags		推送所有标签
