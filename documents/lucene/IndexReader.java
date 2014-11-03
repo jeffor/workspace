@@ -61,6 +61,7 @@ public abstract class IndexReader{
 		}
 	}
 
+	/**通知父读取对象集合，子对象已经关闭*/
 	private void reportCloseToParentReaders(){
 		synchronized(parentReaders){
 			for(IndexReader parent: parentReaders){
@@ -71,16 +72,19 @@ public abstract class IndexReader{
 		}
 	}
 
+	/**返回父引用计数*/
 	public final int getRefCount(){
 		return refCount.get();
 	}
 
+	/**增加父引用计数*/
 	public final void incRef(){
 		if(!tryIncRef()){
 			ensureOpen();
 		}
 	}
 
+	/**增加引用计数*/
 	public final boolean tryIncRef(){
 		int count;
 		while((count = refCount.get()) > 0){
@@ -90,6 +94,7 @@ public abstract class IndexReader{
 		return false;
 	}
 
+	/**减少引用计数*/
 	public final void decRef() throws IOException{
 		if(refCount.get() <= 0)
 			throw new AlreadyClosedException("this indexer is closed");
@@ -137,8 +142,10 @@ public abstract class IndexReader{
 		return DirectoryReader.open(directory, termInfoIndexDivisor);
 	}
 
+	/**根据文档ID获得域向量*/
 	public abstract Fields getTermVector(int docID) throws IOException;
 
+	/**更具文档ID 和 域名称 获得 词向量*/
 	public final Terms getTermVector(int docID, String field) throws IOException{
 		Fields vectors = getTermVector(docID);
 		if(vectors == null)
@@ -146,32 +153,40 @@ public abstract class IndexReader{
 		return vectors.terms(field);
 	}
 
+	/**该索引的有效文档数*/
 	public abstract int numDocs();
 
+	/**该索引的文档总数*/
 	public abstract int maxDoc();
 
+	/**该索引的删除文档数*/
 	public final int numDeletedDocs(){
 		return maxDoc() - numDocs();
 	}
 
+	/**遍历文档,并将数据保存在visitor遍历对象中*/
 	public abstract void document(int docID, StoredFieldVisitor visitor) throws IOException;
 
+	/**遍历文档，返回文档对象*/
 	public final Document document(int docID) throws IOException{
 		final DocumentStoredVisitor visitor = new DocumentStoredVisitor();
 		document(docID, visitor);
 		return visitor.getDocument();
 	}
 
+	/**遍历文档，返回文档对象*/
 	public final Document document(int docID, Set<String> fieldsToLoad) throws IOException{
 		final DocumentStoredVisitor visitor = new DocumentStoredVisitor(fieldsToLoad);
 		document(docID, visitor);
 		return visitor.getDocument();
 	}
 
+	/**判断是否存在删除文档*/
 	public boolean hasDeletions(){
 		return numDeletedDocs() > 0;
 	}
 
+	/**关闭当前索引*/
 	public final synchronized void close() throws IOException{
 		if(!closed){
 			decRef();
@@ -179,27 +194,34 @@ public abstract class IndexReader{
 		}
 	}
 
+	/**关闭索引对象*/	
 	public abstract void doClose() throws IOException;
 
+	/**获得索引对象的环境*/
 	public abstract IndexReaderContext getContext();
 
+	/**获得叶子对象*/
 	public final List<AtomicReaderContext> leaves(){
 		return getContext().leaves();
 	}
 
-
+	/**获得this的key*/
 	public Object getCoreCacheKey(){
 		return this;
 	}
 
+	/**获得this的key*/
 	public Object getCombinedCoreAndDeletesKey(){
 		return this;
 	}
 
+	/**获得索引中包含term的文档总数*/
 	public abstract int docFreq(Term term) throws IOException;
 
+	/**获得索引中term出现的总数*/
 	public abstract long totalTermFreq(Term term) throws IOException;
 
+	
 	public abstract long getSumDocFreq(String field) throws IOException;
 
 	public abstract int getDocCounts(String field) throws IOException;
