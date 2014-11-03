@@ -11,3 +11,129 @@ score(q,d) = coord(q,d) · queryNorm(q) · ∑( tf(t in d) · idf(t)^2 · t.getB
 		term.getBoost();		//针对query中的term提权
 		field.getBoost();		//针对field提权
 		document.getBoost();		//针对document提权
+
+###############################
+	源码分析
+###############################
+
+1 public abstract class Similarity:
+
+	Similarity 定义了lucene的评分接口.该接口只是一个评分信息提取接口，而TFIDFSimilarity则是一个
+	扩展了向量模型计算接口的评分接口.
+
+	该接口定义了lucene如何给 term 评分，它会在 索引阶段 和 查询阶段 分别调用。
+
+public abstract class Similarity{
+	public float coord(int overlap, int maxOverlap){
+		return 1.0f;
+	}
+
+	/**@param valueForNormalization 是 query term nornalization值 的总和*/
+	public float queryNorm(float valueForNormalization){
+		return 1f;
+	}
+
+	/**计算标准化因子 norm(t,d)*/
+	public abstract long computeNorm(FieldInvertState state);
+
+	public abstract SimWeight computeWeight(float queryBoost, CollectionStatics collectionstats, TermStatics... termstats);
+
+	public abstract SimScorer simScorer(SimWeight weight, AutomicReaderContext context) throws IOException;
+
+	public static class SimScore{
+		public SimScore(){}
+
+		/**计算对应文档id的文档分值*/
+		public abstract float score(int doc, float freq);
+
+		/**基于词距计算文档中模糊匹配的词数*/
+		public abstract float computeSlopFactor(int distance);
+
+		/**计算文档的负载因子*/
+		public abstract float computePayloadFactor(int doc, int start, int end, BytesRef payload);
+
+		public Explanation explain(int doc, Explanation freq){
+			Explanation exp = new Explanation(score(doc, freq.getValue()),
+				"score(doc=" +doc+ " freq=" +freq.getValue()+ "), with freq of:");
+			exp.addDetail(freq);
+			return result;
+		}
+	}
+
+	public static class SimWeight{
+		public SimWeight(){};
+
+		public abstract float getValueForNormalization();
+
+		public abstract void normalize(float queryNorm, float topLevelBoost);
+	}
+
+}
+
+public abstract class TFIDFSimilarity{
+	public TFIDFSimilarity(){}
+
+	/**协调因子计算接口*/
+	public abstract float coord(int overlap, int maxOverlap);
+
+	public abstract float queryNorm(float sumOfSquaredWeights);
+
+	/**计算词频*/
+	public abstract folat tf(float freq);
+
+	/**计算逆向文档频率*/
+	public abstract float idf(long docFreq, long numDocs);
+
+	@override
+	public final long computeNorm(FieldInvertState state){
+		float normValue = lengthNorm(state);
+		return encodeNormValue();
+	}
+
+	public abstract long encodeNormValue(float normValue);
+	public abstract float decodeNormValue(long norm);
+
+	/**模糊匹配计算, 基于词距 distance 计算文档中 模糊匹配成功的词数*/
+	public abstract float sloppyFreq(int distance);
+
+	/**计算pyload域中的评分因子, lucene 默认不计算*/
+	public abstract float scorePayload(int doc, int start, int end, BytesRef payload);
+
+	/**创建idf explanation*/
+	public Explanation idfExplain(CollectionStatics collectionstats, TermStatics termstats){
+		float df = termstats.docFreq();
+		float max = collectionstats.maxDoc();
+		float idf = idf(df, max);
+		return new Explanation(idf, "idf(docFreq=" +df+ ", maxDocs=" +max+ ")");
+	}
+
+	/**创建idf explanation*/
+	public Explanation idfExplain(CollectionStatics collectionstats, TermStatics termstats[]){
+		final long max = collectionstats.maxDoc();
+		float idf = 0.0f;
+		final Explanation exp = new Explanation();
+		exp.setDescription("idf(), sum of:");
+		for(final TermStatics stat: termstats){
+			final long df = stat.docFreq();
+			final float termIdf = idf(df, max);
+			exp.addDetail(termIdf, "idf(docFreq=" +df+ ", maxDocs=" +max+ ")");
+			idf += termIdf;
+		}
+		exp.setValue(idf);
+		return exp;
+	}
+
+	@override
+	public final SimWeight computeWeight(float queryBoost, CollectionStatics collectionstats, TermStatics... termstats){
+		final Explanation idfStats = termStats.length == 1 ?
+			idfExplain(collectionstats, termstats[0]):
+			idfExplain(collectionstats, termstats);
+		return new IDFStats(collectionstats.field(), idf, queryBoost);
+	}
+
+	public final SimScorer simScorer(SimWeight stats, AutomicReaderContext context) throws IOException{
+		IDFStats idfstats = (IDFStats)stats;
+		return TFIDFSimScorer(idfstats, context.reader().getNormValues(idfstats.field));
+	}
+
+}

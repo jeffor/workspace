@@ -1,0 +1,76 @@
+##########################
+	实现多线程
+##########################
+
+1 实现 Runnable 接口:
+
+	public class Calculator implements Runnable{
+		private int number;
+
+		public Calculator(int number){
+			this.number = number;
+		}
+
+		@override
+		public void run(){
+			for(int i = 1; i < 10; ++i){
+				System.out.printf("%s: %d * %d = %d\n", Thread.
+					currentThread().getName(), number, i, i*number);
+			}
+		}
+
+		public static void main(String[] args){
+			for(int i = 1; i < 10; ++i){
+				Calculator calculator = new Calculator(i);
+				Thread thread = new Thread(calculator);
+				thread.start();
+			}
+		}
+	}
+
+	每一个java程序至少存在一个执行线程，JVM通过调用main函数执行该线程；创建一个Thread 对象
+	并不能创建一个线程，只有调用Thread对象的start()方法才真正创建一个线程; 当所有线程执行
+	完毕，此时程序才结束。如果任意一个线程执行了 System.exit()方法，则所有线程都将结束；
+
+2 通过继承 Thread类 并覆写run()方法。然后实例化该类的对象，调用start()方法实现线程创建。
+
+##################################
+	获得和设置线程信息
+##################################
+
+3 线程信息:
+	ID		线程的唯一标识
+	Name		线程名称
+	Priority	线程优先级( 0-10 优先级依次升高)
+	Status		线程状态( new, runnable, blocked, waiting, time waiting, terminated)
+
+4 获取线程信息:
+
+public class Calculator implements Runnable{
+	private int number;
+
+	public Calculator(int number){
+		this.number = number;
+	}
+
+	@Override
+	public void run(){
+		for(int i = 1; i <= 10; ++i){
+			System.out.printf("%s: %d * %d = %d\n", Thread.
+				currentThread().getName(), number, i, i*number);
+		}
+	}
+
+	public static void main(String[] args){
+		Thread[] threads = new Thread[10];
+		Thread.State states[] = new Thread.State[10];
+
+		for(int i = 1; i <= 10; ++i){
+			if(i%2 == 0)
+				threads[i].setPriority(Thread.MAX_PRIORITY);
+			else
+				threads[i].setPriority(Thread.MIN_PRIORITY);
+			threads[i].setName("Thread "+i);
+		}
+	}
+}

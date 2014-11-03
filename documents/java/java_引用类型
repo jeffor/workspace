@@ -1,0 +1,28 @@
+1 引用分类：
+	（1）强引用 strong reference
+	（2）弱引用 weak reference
+	（3）软引用 soft reference
+	（4）虚引用 phantom reference
+
+##########################
+	深入理解
+##########################
+
+2 strong reference:
+	当使用某个对象且不希望垃圾回收器(garbage collector)回收该对象时使用
+
+3 weak reference:
+	WeakReference<Widget> weakWidget = new WeakReference<Widget>(widget);		//通过强引用对象生成弱引用
+	弱引用并不强制对象保存在内存中，因此，当对象的强引用销毁时，该对象便可能被垃圾回收器销毁。
+
+4 reference queue:
+	public weakReference(T reference, ReferenceQueue<? super T> q);		//生成一个弱引用并注册到q队列
+
+5 soft reference:
+	软引用和弱引用类似，但是在内存充足的时候，软引用会保存更多的时间
+
+6 phantom reference:
+	虚引用必须与引用队列结合使用。弱一个对象只有虚引用，则其随时可能被垃圾回收器回收。
+	垃圾回收器在回收虚引用对象之前，会先将其加入引用队列。
+	ReferenceQueue queue = new ReferenceQueue();
+	PhantomReference pr = new PhantomReference(obj, queue);
