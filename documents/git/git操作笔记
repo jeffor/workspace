@@ -12,14 +12,13 @@
 	git log --pretty=format:"%h %s %ae" --graph
 
 5 删除文件
-	git rm <filename>			删除普通的跟踪文件
+	git rm <filename>		删除普通的跟踪文件
 	git rm -f <filename>		强制删除暂存文件
 	git rm --cached <filename>	取消跟踪但不删除文件
 
 6 比较文件差异
 	git diff			比较未暂存文件和快照文件的差异
 	git diff --cached		比较已暂存文件和快照文件的差异
-
 
 ##################################
 	远程文件操作
