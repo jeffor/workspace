@@ -1,10 +1,14 @@
-score(q,d) = coord(q,d) · queryNorm(q) · ∑( tf(t in d) · idf(t)^2 · t.getBoost() · norm(t,d) )
+score(q,d) = coord(q,d) · queryNorm(q) · ∑(t in q){ tf(t) · idf(t)^2 · t.getBoost() · norm(t,d) }
 
-1 norm(term, document):								//文档的标准化因子
-	norm(term, document) = documentBoost * fieldsBoost * lengthNorm;
-	documentBoost = doc.getBoost()						//文档提权因子
-	fieldsBoost   = for(field in document){multiply(field.getBoost())};	//包含term的域提权因子乘积
-	lengthNorm    = 1/sqrt(documentTermNum);				//文档的长度因子			
+1 标准化因子计算	norm(t, d)
+	solidNorm(d) = ∏(f in d)fieldNorm(f) * documentNorm(d);
+	norm(t, d) =  solidNorm(d) * ∏(f has t)lengthNorm(f);
+	# 标准化因子 = 域标准化因子 * 文档标准化因子 * 域长度因子
+
+2 query提权 		t.getBoost()
+	#一个query term的提权因子
+	
+
 
 * concepts:
 	(1) 提权：
