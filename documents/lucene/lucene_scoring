@@ -1,143 +1,38 @@
-score(q,d) = coord(q,d) · queryNorm(q) · ∑(t in q){ tf(t) · idf(t)^2 · t.getBoost() · norm(t,d) }
+##################################################
+		lucene 默认评分机制
+##################################################
+1 评分公式:
+	score(q,d) = coord(q,d) · queryNorm(q) · ∑(t in q){ tf(t, d) · idf(t)^2 · t.getBoost() · norm(t,d) }
 
-1 标准化因子计算	norm(t, d)
-	solidNorm(d) = ∏(f in d)fieldNorm(f) * documentNorm(d);
-	norm(t, d) =  solidNorm(d) * ∏(f has t)lengthNorm(f);
-	# 标准化因子 = 域标准化因子 * 文档标准化因子 * 域长度因子
+2 公式解析:
+	coord(q, d)	[协调因子] 一篇文档中匹配的 query term 和 全部 query term 的数量之比;
+	queryNorm(q)	[查询因子] 区分不同query所评的分值
+	tf(t,d)		[词频] 一个 匹配的 term 在该文档中出现的频率
+	idf(t)		[逆向文档频率] 一个匹配的 term 在索引中的逆向文档频率
+	t.getBoost()	[语汇权重] 一个匹配的 term 在query中的权重(默认为1)
+	norm(t, d)	[标准化因子] norm(t, d) = documentNorm(d) * fieldNorm(t, d)
+					documentNorm(d) = d.getBoost()
+					fieldNorm(t, d) = lengthNorm(field) · ∏f.getBoost()
 
-2 query提权 		t.getBoost()
-	#一个query term的提权因子
-	
+##################################################
+		优化方案
+##################################################
 
+1 公式优化:
+	score(q,d) = coord(q, d) * ∑(t in q){idf(t)^2 * t.getBoost() * norm(t, d)}
 
-* concepts:
-	(1) 提权：
-		term.getBoost();		//针对query中的term提权
-		field.getBoost();		//针对field提权
-		document.getBoost();		//针对document提权
+2 优化详解:
+	coord(q,d)	一篇文档中匹配的 query term 和 全部 query term 的数量之比;
 
-###############################
-	源码分析
-###############################
+	queryNorm(q)	只用于区分query，可以不计算;
 
-1 public abstract class Similarity:
+	tf(t, d)	词频,由于商品标题中关键字普遍简明扼要,不应该根据词频区分关键字的重要性,可以统一认为
+			每个商品关键字的词频都为1;
 
-	Similarity 定义了lucene的评分接口.该接口只是一个评分信息提取接口，而TFIDFSimilarity则是一个
-	扩展了向量模型计算接口的评分接口.
+	idf(t)		当用户输入一个句子时，有必要区分各 query term 的权重;
 
-	该接口定义了lucene如何给 term 评分，它会在 索引阶段 和 查询阶段 分别调用。
+	t.getBoost()	用于动态调整查询语句中各词汇的boost值(在关键字识别后将很有效果)
 
-public abstract class Similarity{
-	public float coord(int overlap, int maxOverlap){
-		return 1.0f;
-	}
-
-	/**@param valueForNormalization 是 query term nornalization值 的总和*/
-	public float queryNorm(float valueForNormalization){
-		return 1f;
-	}
-
-	/**计算标准化因子 norm(t,d)*/
-	public abstract long computeNorm(FieldInvertState state);
-
-	public abstract SimWeight computeWeight(float queryBoost, CollectionStatics collectionstats, TermStatics... termstats);
-
-	public abstract SimScorer simScorer(SimWeight weight, AutomicReaderContext context) throws IOException;
-
-	public static class SimScore{
-		public SimScore(){}
-
-		/**计算对应文档id的文档分值*/
-		public abstract float score(int doc, float freq);
-
-		/**基于词距计算文档中模糊匹配的词数*/
-		public abstract float computeSlopFactor(int distance);
-
-		/**计算文档的负载因子*/
-		public abstract float computePayloadFactor(int doc, int start, int end, BytesRef payload);
-
-		public Explanation explain(int doc, Explanation freq){
-			Explanation exp = new Explanation(score(doc, freq.getValue()),
-				"score(doc=" +doc+ " freq=" +freq.getValue()+ "), with freq of:");
-			exp.addDetail(freq);
-			return result;
-		}
-	}
-
-	public static class SimWeight{
-		public SimWeight(){};
-
-		public abstract float getValueForNormalization();
-
-		public abstract void normalize(float queryNorm, float topLevelBoost);
-	}
-
-}
-
-public abstract class TFIDFSimilarity{
-	public TFIDFSimilarity(){}
-
-	/**协调因子计算接口*/
-	public abstract float coord(int overlap, int maxOverlap);
-
-	public abstract float queryNorm(float sumOfSquaredWeights);
-
-	/**计算词频*/
-	public abstract folat tf(float freq);
-
-	/**计算逆向文档频率*/
-	public abstract float idf(long docFreq, long numDocs);
-
-	@override
-	public final long computeNorm(FieldInvertState state){
-		float normValue = lengthNorm(state);
-		return encodeNormValue();
-	}
-
-	public abstract long encodeNormValue(float normValue);
-	public abstract float decodeNormValue(long norm);
-
-	/**模糊匹配计算, 基于词距 distance 计算文档中 模糊匹配成功的词数*/
-	public abstract float sloppyFreq(int distance);
-
-	/**计算pyload域中的评分因子, lucene 默认不计算*/
-	public abstract float scorePayload(int doc, int start, int end, BytesRef payload);
-
-	/**创建idf explanation*/
-	public Explanation idfExplain(CollectionStatics collectionstats, TermStatics termstats){
-		float df = termstats.docFreq();
-		float max = collectionstats.maxDoc();
-		float idf = idf(df, max);
-		return new Explanation(idf, "idf(docFreq=" +df+ ", maxDocs=" +max+ ")");
-	}
-
-	/**创建idf explanation*/
-	public Explanation idfExplain(CollectionStatics collectionstats, TermStatics termstats[]){
-		final long max = collectionstats.maxDoc();
-		float idf = 0.0f;
-		final Explanation exp = new Explanation();
-		exp.setDescription("idf(), sum of:");
-		for(final TermStatics stat: termstats){
-			final long df = stat.docFreq();
-			final float termIdf = idf(df, max);
-			exp.addDetail(termIdf, "idf(docFreq=" +df+ ", maxDocs=" +max+ ")");
-			idf += termIdf;
-		}
-		exp.setValue(idf);
-		return exp;
-	}
-
-	@override
-	public final SimWeight computeWeight(float queryBoost, CollectionStatics collectionstats, TermStatics... termstats){
-		final Explanation idfStats = termStats.length == 1 ?
-			idfExplain(collectionstats, termstats[0]):
-			idfExplain(collectionstats, termstats);
-		return new IDFStats(collectionstats.field(), idf, queryBoost);
-	}
-
-	public final SimScorer simScorer(SimWeight stats, AutomicReaderContext context) throws IOException{
-		IDFStats idfstats = (IDFStats)stats;
-		return TFIDFSimScorer(idfstats, context.reader().getNormValues(idfstats.field));
-	}
-
-}
+	norm(t,d)	norm 包含 documentNorm, fieldNorm, 以及 lengthNorm. 在商品查询时,由于数据域普遍简短,故
+			lengthNorm 可以省略, 而 documentNorm 和 fieldNorm 可以用来区分 不同的 field 和 不同类型
+			的 document, 因此需保留.
