@@ -45,32 +45,18 @@
 	Status		线程状态( new, runnable, blocked, waiting, time waiting, terminated)
 
 4 获取线程信息:
+	thread.getID();
+	thread.getState();	//获取运行状态
+	//线程名称操作
+	thread.getName();
+	thread.setName();
+	//优先级操作
+	thread.getPriority();
+	thread.setPriority();
 
-public class Calculator implements Runnable{
-	private int number;
+##################################
+	线程的中断
+##################################
 
-	public Calculator(int number){
-		this.number = number;
-	}
-
-	@Override
-	public void run(){
-		for(int i = 1; i <= 10; ++i){
-			System.out.printf("%s: %d * %d = %d\n", Thread.
-				currentThread().getName(), number, i, i*number);
-		}
-	}
-
-	public static void main(String[] args){
-		Thread[] threads = new Thread[10];
-		Thread.State states[] = new Thread.State[10];
-
-		for(int i = 1; i <= 10; ++i){
-			if(i%2 == 0)
-				threads[i].setPriority(Thread.MAX_PRIORITY);
-			else
-				threads[i].setPriority(Thread.MIN_PRIORITY);
-			threads[i].setName("Thread "+i);
-		}
-	}
-}
+5 多线程程序的结束
+	一个多线程程序正常结束有两种情况,一是所有线程都结束时,二是存在一个执行exit()的子线程;
