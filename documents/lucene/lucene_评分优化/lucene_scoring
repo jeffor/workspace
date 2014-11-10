@@ -36,3 +36,18 @@
 	norm(t,d)	norm 包含 documentNorm, fieldNorm, 以及 lengthNorm. 在商品查询时,由于数据域普遍简短,故
 			lengthNorm 可以省略, 而 documentNorm 和 fieldNorm 可以用来区分 不同的 field 和 不同类型
 			的 document, 因此需保留.
+
+coord(q, d) = overlap/maxOverlap;
+
+
+====================================================	weight 对象
+
+idf (t) = (log(numDoc/docFreq + 1)) + 1;		//计算逆向文档频率
+
+queryWeight(t) = queryBoost(t) * idf(t);		//计算query term 权值
+
+value = idf(t)*queryWeight(t)				//计算 queryWeight * idf(t) 预值
+
+====================================================	score 对象
+
+score = value * norm(d);				//计算 score
