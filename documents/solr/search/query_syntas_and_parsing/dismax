@@ -1,0 +1,88 @@
+1 common query parameters:
+	defType:		定义query解析器的类型，默认使用 Standard Query Paser
+
+	sort:			定义排序规则
+
+				solr 对查询结果默认按照评分数值排序。可以定义根据某个field排序，但是该field
+				必须被索引且存储的是单值数据(indexed = "true" multiValue = "false")，且存储
+				的数据本能被划分成多个 token 被索引。
+
+				sort 语法:
+					sort=<field name> <sort direction>,<field name> <sort direction>,...
+
+	start:			定义返回数据的起始偏移量
+
+	rows:			定义返回数据的条数
+
+	fq:			filter query, 定义针对返回数据的过滤语句,他不会影响文档的打分
+
+				fq 语法:
+					fq=+popularity:[10 TO *]+selection:0
+	
+
+	fl:			field list, 定义返回数据的 域显示列表
+				eg:
+					fl=id,title,product(price,popularity)
+					fl=id,[explain]
+
+	debug:			显示调试信息
+				eg:
+					debug=true
+					debug=query
+					debug=timing
+					debug=results
+
+	timeAllowed:		定义查询时间上限
+
+	omitHeader:		省略返回的头信息
+
+	wt:			数据的书写形式
+
+	cache:			定义数据缓存
+
+	logParamsList:		定义参数的日志记录信息,默认全部参数记录日志
+				eg:
+					logParamsList=q,fq		只记录 q 和 fq 信息
+					logParamsList=			不记录任何查询参数信息
+
+2 Standard paser:
+	q:			query[必填]
+	q.op:			默认查询操作符(AND,OR),会覆写schema.xml中的设置
+	df:			定义默认查询field,会覆写schema.xml中的设置
+
+
+	###    standard query 的语法    ###
+
+	(1) 定义 term:		单词形式term只简单拼写单词，词组形式的term必须加上双引号。
+
+	(2) term 通配符:	? 为单字符通配, * 为多字符通配。
+
+	(3) term 模糊匹配:	roam~<distance>		默认词距为2
+
+	(4) 范围查询:		fieldName:[<start> TO <stop>]		//闭区间范围查询
+				fieldName:{<start> TO <stop>}		//开区间范围查询
+				#范围查询支持 数值范围， 日期范围 和 字符串范围 的查询
+
+	(5) term boost:		<term>^<boost value>
+
+	(6) 指定查询field:	title:"The Right Way" AND text:go
+
+	(7) 布尔查询:		AND &&, OR ||, NOT !, +, -
+
+	(8) 转义字符:		solr 中特定的转义字符: + - && || ! ( ) { } [ ] ^ " ~ * ? : /
+
+	(9) 组合查询:		(jack AND apache) OR website
+
+3 DisMax parser:
+	DisMax parser (maximum disjunction)用于处理简单的查询语句(没有复杂的查询语法)，其他的处
+	理策略作为可选参数提供，并且这些可选参数可以写入 solrconfig.xml 作为默认参数。
+
+	###    参数解析    ###
+	q:			查询语句，仅仅支持 +,-,"" 语法
+
+	q.alt:			在q未定义时有效，可用于查询所有数据(注意 q 不支持 * 查询)
+
+	qf:			query field, 定义查询field及其boost值
+
+	mm:			minimum should match, 最少匹配term数限制（2<-25%<9<-3）
+	
