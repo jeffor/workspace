@@ -1,0 +1,63 @@
+
+###    基本操作    ###
+
+1 检查集群状态：	curl 'localhost:9200/_cat/health?v'
+
+2 查看节点信息：	curl 'localhost:9200/_cat/nodes?v'
+
+3 列出所有索引：	curl 'localhost:9200/_cat/indices?v'
+
+4 创建索引：		curl -XPUT 'localhost:9200/customer?pretty'			#创建了一个名为customer的索引
+
+5 索引一篇文档：	curl -XPUT 'localhost:9200/customer/external/1?pretty' -d '
+			{
+			  "name": "John Doe"
+			}'
+
+			curl -XPOST 'localhost:9200/customer/external?pretty' -d '
+			{
+			  "name": "Jane Doe"
+			}'
+			#指定document id时用put命令,该命令也可替换原有文档(整体替换，非局部更新)
+			#当不指定document id时用post命令，此时elasticsearch会自动生成文档id
+
+6 查询一篇文档：	curl -XGET 'localhost:9200/customer/external/1?pretty'		#根据文档ID查询
+
+7 删除一个索引：	curl -XDELETE 'localhost:9200/customer?pretty'
+
+8 更新文档数据：	curl -XPUT 'localhost:9200/customer/external/1?pretty' -d '
+			{
+			  "name": "John Doe"
+			}'
+			#更新文档局部数据
+
+9 删除一篇文档：	curl -XDELETE 'localhost:9200/customer/external/2?pretty'
+
+10 文档批量处理：	curl -XPOST 'localhost:9200/customer/external/_bulk?pretty' -d '
+			{"index":{"_id":"1"}}
+			{"name": "John Doe" }
+			{"index":{"_id":"2"}}
+			{"name": "Jane Doe" }
+			'
+			#索引两篇文档
+
+			curl -XPOST 'localhost:9200/customer/external/_bulk?pretty' -d '
+			{"update":{"_id":"1"}}
+			{"doc": { "name": "John Doe becomes Jane Doe" } }
+			{"delete":{"_id":"2"}}
+			'
+			#包含更新，删除操作
+
+			curl -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json	#通过磁盘文件存储的指令实现批量操作
+
+11 查询操作：		curl 'localhost:9200/bank/_search?q=*&pretty'			#Request 查询
+
+			curl -XPOST 'localhost:9200/bank/_search?pretty' -d '
+			{
+			  "query": { "match_all": {} }
+			}'								#Post 查询
+
+
+
+
+

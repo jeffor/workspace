@@ -80,9 +80,31 @@
 	###    参数解析    ###
 	q:			查询语句，仅仅支持 +,-,"" 语法
 
-	q.alt:			在q未定义时有效，可用于查询所有数据(注意 q 不支持 * 查询)
+	q.alt:			alternate query, 在q未定义时有效,支持Standard Parse 查询语法
 
-	qf:			query field, 定义查询field及其boost值
+	qf:			query field, 限定查询的field 以及各 field 的 boost 值
 
-	mm:			minimum should match, 最少匹配term数限制（2<-25%<9<-3）
+	mm:			minimum match, 最少匹配 term数 限制（2<-25%<9<-3）
 	
+	pf:			parse field, 用于定义特定field的boost值
+
+	ps:			phrase slop, 当多个term在一个field中匹配时看成一个短语的slop值
+
+	qs:			query slop, 定义用户搜索短语时的模糊匹配slop值
+
+	bq:			boost query, 附加的 query clause, 用于提权 特定的文档
+
+	bf:			boost function, 定义提权函数
+
+4 Extended DisMax parser:
+
+	###    参数解析    ###
+	q.alt			alternate query, 在q未定义时有效, 支持所有的查询语法
+
+	mm			minimum should match, 最小需要匹配
+
+	qf			query field, 限定查询field
+
+	qs			query slop, 定义 qf 中匹配的 phrase slop
+
+	pf			parse field, 

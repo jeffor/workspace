@@ -1,0 +1,15 @@
+1 启动服务：
+	当下载解压 elasticsearch-[version].tar.gz 后, 运行 bin/elasticsearch 即可启动搜索服务，
+	此时服务会在控制台前端启动，若想要在后端启动服务，需要在启动时加 -d 参数，即:
+	bin/elasticsearch -d
+
+2 配置服务：
+	在启动脚本里，elasticsearch 已经设置了默认的 JAVA_OPTS 参数。 其中包含了 -Xmx (用于设置
+	内存使用上限) 和 -Xms (设置最小内存使用)。
+	在elasticsearch配置文件中 有一个 ES_HEAP_SIZE 参数，它会将 ES_MAX_MEM 和 ES_MIN_MEM 设
+	为同一个值。
+	最好将最大和最小内存设为同一个值，并启动内存固化锁 (mlockall)。
+
+
+
+

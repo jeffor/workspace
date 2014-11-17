@@ -1,0 +1,39 @@
+1 加载驱动:
+	class.forName(driverName);
+
+	### eg:
+		Class.forName("sun.jdbc.odbc.JdbcodbcDriver");
+		Class.forName("com.mysql.jdbc.Driver");
+
+2 获得数据库连接:
+	通过 java.sql.DriverManager 的静态方法:
+		public static Connection getConnection(String url) throws Exception;
+		public static Connection getConnection(String url,
+					String userName, String password) throws Exception;
+
+	url 格式: jdbc:protocol://hostname:port/databasename?user=username&password=pwd
+		protocol 根据数据库类型不同而变化:
+			postsql, mysql, odbc, oracle:thin
+
+3 创建 statement 操作语句:
+
+	###    普通语句:
+
+	Statement statement = conn.createStatement();
+
+	ResultSet executeQuery(String sqlQuery) throws SQLException;
+	int executeUpdate(String sqlQuery) throws SQLException;
+
+	###    预编译语句:
+	PreparedStatement statement = conn.createPreparedStatement(sqlQuery);
+
+	ResultSet executeQuery() throws SQLException;
+	int executeUpdate() throws SQLException;
+
+4 读取 ResultSet 中的数据:
+
+	rst.getXXX(columnIndex);
+	rst.getXXX(columnName);
+
+	## XXX为column的解析类型	
+		
