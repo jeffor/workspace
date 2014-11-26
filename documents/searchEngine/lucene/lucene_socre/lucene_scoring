@@ -13,6 +13,7 @@
 	norm(t, d)	[标准化因子] norm(t, d) = documentNorm(d) * fieldNorm(t, d)
 					documentNorm(d) = d.getBoost()
 					fieldNorm(t, d) = lengthNorm(field) · ∏f.getBoost()
+					lengthNorm 意义为当一篇文档越长，则关键字价值越低
 
 ##################################################
 		优化方案

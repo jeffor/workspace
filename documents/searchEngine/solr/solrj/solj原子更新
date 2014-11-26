@@ -1,0 +1,8 @@
+
+
+	doc.setField("id", 81);
+	Map setOper = new HashMap();
+	setOper.put("set", "小冰");
+	doc.addField("name", setOper);
+	UpdateResponse response = server.add(doc);
+	server.commit(); 

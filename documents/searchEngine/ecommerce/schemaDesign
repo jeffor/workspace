@@ -1,0 +1,61 @@
+
+
+/**基本信息*/
+name		商品名称(多值域，为不带广告描述商品称谓，可能有多种称谓或多语种称谓)
+brand		商品品牌(多值域，中英品牌名称)
+title		商品标题(单值域，带广告描述的宣传标题)
+brief		商品简介(单值域，附加介绍数据)
+
+/**限定筛选*/
+price		价格
+weight		重量
+unit		单位
+
+
+/**促销信息*/
+score		积分
+
+/**时间信息*/
+uptime		上架时间
+last_modify	更新时间
+downtime	下架时间
+
+/**策略信息*/
+comments_count	评论次数
+view_w_count	周浏览词数
+buy_w_count	周购买词数
+
+/**有效信息*/
+marktable	是否上架
+
+
+###################################################
+		数据预处理
+###################################################
+
+具体数据：
+	品牌映射表	tree(id, brand_name); tree(brand_name, (id, id_ptr)); {id_ptr: (counts, price_range)}
+	分类映射表	tree(id, cate_name);  tree(cate_name, (id, id_ptr)); {id_ptr: (counts, price_range)}
+	品名映射表	tree(id, name); tree(name, (id, id_ptr)); {id_ptr: (counts, price_range)}
+
+具体操作：
+	1 数据预统计：主要在商品上架和下架时更新各个记录的筛选域
+	2 搜索定向：根据关键字确定
+
+
+
+###################################################
+		搜索流程
+###################################################
+
+keywords = input();
+if((category = categoryFielter(keywords)) != null){
+	response = search(category, keywords);
+}else{
+	response = search_category_facet(keywords);
+}
+display(response);
+
+
+upload:
+	

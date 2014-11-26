@@ -1,0 +1,39 @@
+1 calsspath:
+	There are several folders containing jars used by SolrJ: /dist, /dist/solrj-lib and /lib. 
+	A minimal set of jars (you may find need of others depending on your usage scenario) 
+	to use SolrJ is as follows:
+
+	From /dist:
+
+	    apache-solr-solrj-*.jar 
+
+	From /dist/solrj-lib
+
+	    commons-codec-1.3.jar
+	    commons-httpclient-3.1.jar
+	    commons-io-1.4.jar
+	    jcl-over-slf4j-1.5.5.jar
+	    slf4j-api-1.5.5.jar 
+
+	From /lib
+
+	    slf4j-jdk14-1.5.5.jar 
+
+
+2-1 连接solr服务器:
+
+	/**通过 http client 连接 solr服务器*/
+	String url = "http://localhost:8080/solr";
+	SolrServer = new HttpSolrServer(url);
+
+	/** 内嵌式连接 solr*/
+	System.setProperty("solr.solr.home", "/home/shalinsmangar/work/oss/branch-1.3/example/solr");
+	CoreContainer.Initializer initializer = new CoreContainer.Initializer();
+	CoreContainer coreContainer = initializer.initialize();
+	EmbeddedSolrServer server = new EmbeddedSolrServer(coreContainer, "");
+
+2-2 数据操作:
+	server.deleteByQuery("*:*");	//清空数据
+
+	SoleInputDocument doc = new SoleInputDocument();
+	doc.addField("id")

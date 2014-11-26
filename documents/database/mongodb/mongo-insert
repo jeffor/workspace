@@ -1,0 +1,10 @@
+1 原理：
+	当执行插入操作时，驱动程序将数据转换成BSON形式。
+	数据库解析BSON数据，查看是否包含_id，并且文档不大于4MB。
+	
+
+2 操作：
+	db.collectionName.remove();		//清空数据集合
+	db.collectionName.remove({option});	//清空数据集合中指定数据
+	
+	
