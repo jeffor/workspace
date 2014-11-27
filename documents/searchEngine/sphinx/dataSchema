@@ -1,0 +1,65 @@
+sdb_b2c_goods
+
+商品主表
+
+    表结构
+    colname         describe         type                 null            extra                 pkey
+*   goods_id        商品ID           bigint(20)           unsigned          Y(auto_increment)     Y
+*   bn              商品编号         varchar(200)          N                 N
+*   name            商品名称         varchar(200)          Y                 N
+*   price           销售价           decimal(20,3)         Y                 N
+*   type_id         类型             mediumint(8) unsigned N                 N
+*   cat_id          分类             mediumint(8) unsigned Y                 N
+*   brand_id        品牌             mediumint(8) unsigned N                 N
+*   marketable      上架             enum('true','false')  Y                 N
+*   store           库存             mediumint(8) unsigned N                 N
+    notify_num      缺货登记         mediumint(8) unsigned Y                 N
+*   uptime          上架时间         int(10) unsigned      N                 N
+    downtime        下架时间         int(10) unsigned      N                 N
+*   last_modify     更新时间         int(10) unsigned      N                 N
+*   p_order         排序             mediumint(8) unsigned Y                 N
+*   d_order         动态排序         mediumint(8) unsigned Y                 N
+    score           积分             mediumint(8) unsigned N                 N
+    cost            成本价           decimal(20,3)         Y                 N
+    mktprice        市场价           decimal(20,3)         N                 N
+    weight          重量             decimal(20,3)         N                 N
+    unit            单位             varchar(20)           N                 N
+    brief           商品简介         varchar(255)          N                 N
+*   goods_type      销售类型         enum('normal','bind','gift')         Y                 N
+    image_default_id默认图片         varchar(32)           N                 N
+    udfimg          是否用户自定义图 enum('true','false')  N                 N
+    thumbnail_pic   缩略图           varchar(32)           N                 N
+    small_pic       小图             varchar(255)          N                 N
+    big_pic         大图             varchar(255)          N                 N
+    intro           详细介绍         longtext              N                 N
+    store_place     库位             varchar(255)          N                 N
+    min_buy         起定量           mediumint(8) unsigned N                 N
+    package_scale   打包比例         decimal(20,2)         N                 N
+    package_unit    打包单位         varchar(20)           N                 N
+    package_use     是否开启打包     enum('0','1')         N                 N
+    score_setting   score_setting    enum('percent','number')         N                 N
+    store_prompt    库存提示规则     mediumint(8) unsigned N                 N
+    nostore_sell    无库存销售       enum('0','1')         N                 N
+    goods_setting   商品设置         longtext              N                 N
+    spec_desc       货品规格序列化   longtext              N                 N
+    params          商品规格序列化   longtext              N                 N
+    disabled        是否失效         enum('true','false')  Y                 N
+    rank_count      google rank      int(10) unsigned      Y                 N
+*   comments_count  评论次数         int(10) unsigned      Y                 N
+*   view_w_count    周浏览次数       int(10) unsigned      Y                 N
+*   view_count      浏览次数         int(10) unsigned      Y                 N
+    count_stat      统计数据序列化   longtext              N                 N
+*   buy_count       购买次数         int(10) unsigned      Y                 N
+*   buy_w_count     购买次数         int(10) unsigned      Y                 N
+    
+
+
+    ind_frontend            disabled goods_type marketable
+    idx_goods_type          goods_type
+    idx_d_order             d_order
+    idx_goods_type_d_order  goods_type d_order
+    idx_marketable          marketable
+    idx_c_type_id           type_id
+    idx_c_cat_id            cat_id
+    idx_c_brand_id          brand_id
+    idx_c_store_prompt      store_prompt

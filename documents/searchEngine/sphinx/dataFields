@@ -1,0 +1,101 @@
+
+sdb_b2c_goods
+	goods_id		商品id
+	goods_type		销售类型('normal', 'bind', 'gift')
+	type_id,		商品类型id
+	cat_id,			分类id
+	brand_id,		品牌id
+	price,			商品价格
+	name,			商品名称
+	G.bn,			商品编号
+	p_order,		排序
+	d_order,		动态排序
+	comments_count,		评论次数
+	view_w_count,		周浏览次数
+	view_count,		浏览总次数
+	buy_count,		购买总次数
+	buy_w_count,		周购买次数
+	last_modify,		更新时间
+
+	/**各种排序标准*/
+	p_1,
+	p_2,
+	p_3,
+	p_4,
+	p_5,
+	p_6,
+	p_7,
+	p_8,
+	p_9,
+	p_10,
+	p_11,
+	p_12,
+	p_13,
+	p_14,
+	p_15,
+	p_16,
+	p_17,
+	p_18,
+	p_19,
+	p_20,
+
+
+counter_type,
+counter_value,
+
+数据提取解析:
+	FROM sdb_b2c_goods AS G 
+	LEFT JOIN sdb_b2c_counter_attach AS A ON G.goods_id = A.attach_id 
+	LEFT JOIN sdb_b2c_counter AS C ON A.counter_id=C.counter_id 
+	LEFT JOIN sdb_b2c_member_comments AS M ON G.goods_id =M.type_id 
+	WHERE G.marketable=true and G.goods_type='normal'
+
+
+	sdb_b2c_goods		 商品主表                 (提取各个商品信息)
+	sdb_b2c_counter_attach   计数器关联表		  (提取计数器id, 根据商品id)
+	sdb_b2c_counter		 计数器表		  (提取计数器信息, 根据计数器id) 
+	sdb_b2c_member_comments  咨询,评论,留言,短消息表  (提取评论消息, 根据商品id, 且商品上架, 销售类型为普通商品)
+
+
+
+
+        sql_attr_uint = cat_id
+        sql_attr_uint = type_id
+        sql_attr_uint = brand_id
+        sql_attr_float = price
+        sql_attr_multi  = uint spec_value_id from query; SELECT goods_id, spec_value_id FROM sdb_b2c_goods_spec_index
+        sql_attr_multi  = uint spec_id from query; SELECT goods_id, spec_id FROM sdb_b2c_goods_spec_index
+        sql_attr_uint = p_1
+        sql_attr_uint = p_2
+        sql_attr_uint = p_3
+        sql_attr_uint = p_4
+        sql_attr_uint = p_5
+        sql_attr_uint = p_6
+        sql_attr_uint = p_7
+        sql_attr_uint = p_8
+        sql_attr_uint = p_9
+        sql_attr_uint = p_10
+        sql_attr_uint = p_11
+        sql_attr_uint = p_12
+        sql_attr_uint = p_13
+        sql_attr_uint = p_14
+        sql_attr_uint = p_15
+        sql_attr_uint = p_16
+        sql_attr_uint = p_17
+        sql_attr_uint = p_18
+        sql_attr_uint = p_19
+        sql_attr_uint = p_20
+    sql_attr_uint = comments_count
+    sql_attr_uint = view_w_count
+    sql_attr_uint = view_count
+    sql_attr_uint = buy_count
+    sql_attr_uint = buy_w_count
+        sql_attr_uint = p_order
+        sql_attr_uint = d_order
+        sql_attr_uint = counter_type
+        sql_attr_uint = counter_value
+        sql_attr_uint = comments
+        sql_attr_uint = last_modify
+        sql_attr_multi  = uint tag_id from query; SELECT rel_id, tag_id FROM sdb_desktop_tag_rel WHERE app_id='b2c' AND tag_type = 'goods'
+        sql_attr_multi  = uint product_id from query; SELECT goods_id, product_id FROM sdb_b2c_products
+

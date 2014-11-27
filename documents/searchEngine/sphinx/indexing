@@ -1,0 +1,81 @@
+1 数据源:
+	被索引的数据通常来自不同的数据源：sql数据库,普通文本，html文件......
+	从sphinx角度来看，这些数据都是一些结构化的文档集合，每篇文档都有相同
+	的数据域。这类似于sql，可以把行记录看成一篇文档，列就是数据域的定义。
+
+	索引不同的数据源需要不同的 数据源驱动(data source driver)。检索引擎内
+	置了一些驱动:如mysql, PostgeSql, MS Sql, ODBC。
+
+	一个索引可以根据需求配置多个数据源，但是这些数据源的数据最终会被索引
+	到一个索引库中，看起来就像一个数据源的数据。
+
+2 文本域(full-text field):
+	文本域 存储检索引擎要索引的文本内容，这些内容将被分为关键字索引化到索
+	引库中用于搜索。
+
+	sphinx的索引结构最多支持256各索引域。需要注意的是，原始文本将不被存储。
+
+3 属性(attributes):
+	属性是搜索阶段用于条件筛选，过滤，排序的域。
+	和文本域不同的是，属性不会被全文索引，它们将存储在索引中，因此它们不能
+	被搜索，只能作为搜索条件。
+
+	属性名大小写不敏感，当前支持的属性类型:
+		uint			(无符号整型 1~32 bits)
+		UNIX timestamp		(时间戳)
+		float			(32bits 单精度浮点值)
+		string
+		json
+		MVA			(多值属性, multi-value attributes)
+
+	检索引擎运行内存需求计算:  (1+number_of_attrs)*number_of_docs*4 bytes
+
+4 多值属性(MVA):
+	多值属性是 32位无符号整型 集合，集合的大小没有限制
+
+5 索引(indexes):
+	索引是搜索引擎实现快速搜索的数据结构，生成该结构的过程叫做索引化。
+	sphinx支持两种索引结构: Disk indexes 和 RT indexes
+
+	Disk indexes 能进行高效索引和检索，同时在内存中保存尽可能少的识别信息。
+	这导致数据更新将消耗更多时间，你将无法更新索引中的文档或向索引中添加新
+	的文档，只能通过重建索引实现更新。通常可以通过划分多个子Disk索引，将常
+	更新的数据区分开来以减少重建索引的消耗。
+
+	RT indexes 支持动态更新文档和增量索引。
+
+	distributed indexes 支持分布式索引。
+
+6 数据源的限定条件:
+	文档ID必须为无符号非0整型(uint, bint, timestamp)
+
+
+7 字符集映射表:
+	通过 charset_table 属性，为每一个索引设置字符处理规则。
+	默认内置了英语和俄语的字符处理规则。
+	
+8 关系数据库数据源:
+	数据源处理流程:
+		1 连接数据库
+		2 pre-query 初始化设置(编码设置)
+			可以定义多个 pre-query 操作语句，它们将会在 main_fetch_query 
+			之前顺序执行，pre-query是无返回值的，通常用于设置编码。
+			sql_query_pre = SET NAMES utf8
+			sql_query_pre = SET SESSION query_cache_type=OFF
+		3 sql_query 主要的文档提取语句，只能定义一条 sql_query
+			文档id必须为第一个域。
+		4 sql_query_post 在sql_query执行成功后执行
+			sql_query_post = DROP TABLE my_tmp_table
+		5 关闭数据库
+		6 连接数据库
+		7 sql_query_post_index 在索引成功后执行，用于更新索引记录
+		8 关闭数据库
+
+9 range_query:
+	一个main_query可能锁定整张表,会消耗很多资源。因此sphinx支持范围查询。
+
+	sql_query_range = SELECT MIN(id),MAX(id) FROM documents
+	sql_range_step = 1000
+	sql_query = SELECT * FROM documents WHERE id>=$start AND id<=$end
+
+

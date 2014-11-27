@@ -1,0 +1,10 @@
+1 RT indexes 定义:
+	index rt
+	{
+	    type = rt
+	    path = /usr/local/sphinx/data/rt
+	    rt_field = title
+	    rt_field = content
+	    rt_attr_uint = gid
+	}
+
